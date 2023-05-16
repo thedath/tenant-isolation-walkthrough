@@ -2,12 +2,14 @@ import {
   aws_lambda as lambda,
   aws_apigateway as apiGateway,
   aws_dynamodb as dynamodb,
+  aws_iam as iam,
   Stack,
   StackProps,
+  CfnOutput,
 } from "aws-cdk-lib";
 import { AttributeType } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
-import { exampleLambdaDir } from "./exampleLambda";
+import { exampleLambdaDir } from "./lambda/exampleLambda";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class TenantIsolationWalkthroughStack extends Stack {
@@ -45,7 +47,35 @@ export class TenantIsolationWalkthroughStack extends Stack {
         DDB_TABLE_NAME: ddb.tableName,
       },
     });
-    ddb.grantFullAccess(exampleLambda);
+    // ddb.grantFullAccess(exampleLambda);
+
+    new CfnOutput(this, "ARN", { value: exampleLambda.functionArn });
+    new CfnOutput(this, "ROLE_ARN", { value: exampleLambda.role?.roleArn! });
+
+    const lambdaRole = new iam.Role(this, "ExampleLambdaRole", {
+      assumedBy: new iam.ArnPrincipal(exampleLambda.role?.roleArn!),
+
+      /**
+       * 'assumedBy' param will add 'sts:AssumeRole' as the action in the IAM trust policy.
+       * {
+          "Version": "2012-10-17",
+          "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Principal": {
+                          "AWS": "arn:aws:iam::318250836602:role/TenantIsolationWalkthroug-ExampleLambdaServiceRole-79GG8DK25V0U"
+                      },
+                      "Action": "sts:AssumeRole"
+                  }
+              ]
+          }
+       */
+    });
+    ddb.grantFullAccess(lambdaRole);
+    exampleLambda.addEnvironment("ASSUMED_ROLE_ARN", lambdaRole.roleArn);
+    // lambdaRole.addToPolicy(new iam.PolicyStatement({
+
+    // }));
 
     const api = new apiGateway.RestApi(this, "ExampleAPI");
 

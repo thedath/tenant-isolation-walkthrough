@@ -1,0 +1,7 @@
+{
+  "TenantIsolationWalkthroughStack": {
+    "ROLEARN": "arn:aws:iam::318250836602:role/TenantIsolationWalkthroug-ExampleLambdaServiceRole-79GG8DK25V0U",
+    "ARN": "arn:aws:lambda:us-west-2:318250836602:function:TenantIsolationWalkthroughSt-ExampleLambdaF227E16E-G0rzWXk03G6V",
+    "ExampleAPIEndpointE7C2DF6D": "https://ebyyilovq4.execute-api.us-west-2.amazonaws.com/prod/"
+  }
+}
