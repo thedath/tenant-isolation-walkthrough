@@ -71,11 +71,20 @@ export class TenantIsolationWalkthroughStack extends Stack {
           }
        */
     });
-    ddb.grantFullAccess(lambdaRole);
+    // ddb.grantFullAccess(lambdaRole);
     exampleLambda.addEnvironment("ASSUMED_ROLE_ARN", lambdaRole.roleArn);
-    // lambdaRole.addToPolicy(new iam.PolicyStatement({
-
-    // }));
+    lambdaRole.addToPolicy(
+      new iam.PolicyStatement({
+        resources: [ddb.tableArn],
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:PutItem"],
+        // conditions: {
+        //   "ForAllValues:StringLike": {
+        //     "dynamodb:LeadingKeys": ["aws:RequestTag/bbb"],
+        //   },
+        // },
+      })
+    );
 
     const api = new apiGateway.RestApi(this, "ExampleAPI");
 
